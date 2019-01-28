@@ -8,6 +8,7 @@ using PokemonUnity.Saving;
 using PokemonUnity.Networking.Packets;
 using PokemonUnity.Networking.Packets.Incoming;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PokemonUnity.Networking
 {
@@ -25,9 +26,11 @@ namespace PokemonUnity.Networking
 
         private static UdpClient client;
         private static IPEndPoint ipEndPoint;
-        public static bool IsRunning = false;
 
-        private static Queue<OutgoingPacket> packetStack;
+        public static bool IsRunning = false;
+        private static bool hasConnection = false;
+
+        private static Queue<OutgoingPacket> packetStack = new Queue<OutgoingPacket>();
 
         /// <summary>
         /// Starts the server and sends a ping to the server to authenticate this user.
@@ -36,9 +39,9 @@ namespace PokemonUnity.Networking
         {
             IPHostEntry hostEntry = Dns.GetHostEntry(ipAdress);
 
-            // Loop through the AddressList to obtain the supported AddressFamily. This is to avoid
-            // an exception that occurs when the host IP Address is not compatible with the address family
-            // (typical in the IPv6 case).
+            /// Loop through the AddressList to obtain the supported AddressFamily. This is to avoid
+            /// an exception that occurs when the host IP Address is not compatible with the address family
+            /// (typical in the IPv6 case).
             foreach (IPAddress adress in hostEntry.AddressList)
             {
                 IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(ipAdress), port);
@@ -95,48 +98,61 @@ namespace PokemonUnity.Networking
                         collectedPacket = (IncomingPacket)formatter.Deserialize(memoryStream);
                     }
 
-                    if (!isAuth)
+                    if (hasConnection)
                     {
-                        if (collectedPacket.Type == IncomingPacketType.AUTH)
+                        if (!isAuth)
                         {
-                            IAuthenticatePacket token = (IAuthenticatePacket)collectedPacket.PacketContainer;
-                            switch (token.Authenticated)
+                            if (collectedPacket.Type == IncomingPacketType.AUTH)
                             {
-                                case IAuthenticatePacket.AuthOptions.SUCCES:
-                                    isAuth = true;
-                                    authToken = token.AuthenticationKey;
-                                    EmptyOutgoingStack();
-                                    break;
-                                case IAuthenticatePacket.AuthOptions.FAILED:
-                                    isAuth = false;
-                                    authToken = string.Empty;
-                                    //Failed Authentication
-                                    break;
-                                case IAuthenticatePacket.AuthOptions.ERROR:
-                                    isAuth = false;
-                                    authToken = string.Empty;
-                                    //Error Handling
-                                    break;
-                                default:
-                                    break;
+                                IAuthenticatePacket token = (IAuthenticatePacket)collectedPacket.PacketContainer;
+                                switch (token.Authenticated)
+                                {
+                                    case IAuthenticatePacket.AuthOptions.SUCCES:
+                                        isAuth = true;
+                                        authToken = token.AuthenticationKey;
+                                        EmptyOutgoingStack();
+                                        break;
+                                    case IAuthenticatePacket.AuthOptions.FAILED:
+                                        isAuth = false;
+                                        authToken = string.Empty;
+                                        //Failed Authentication
+                                        break;
+                                    case IAuthenticatePacket.AuthOptions.ERROR:
+                                        isAuth = false;
+                                        authToken = string.Empty;
+                                        //Error Handling
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                //Server is sending useless data
+                                //Should be discarded
+                                //Possible cheater or server is not doing it's job correctly
                             }
                         }
                         else
                         {
-                            //Server is sending useless data
-                            //Should be discarded
-                            //Possible cheater or server is not doing it's job correctly
+                            if (collectedPacket.Type == IncomingPacketType.TRADE)
+                            {
+                                //Pass data through to TradeManager
+                            }
+                            else if (collectedPacket.Type == IncomingPacketType.BATTLE)
+                            {
+                                //Pass data through to OnlineBattleManager
+                            }
                         }
                     }
                     else
                     {
-                        if(collectedPacket.Type == IncomingPacketType.TRADE)
+                        IReceivedConnection receivedConnection = (IReceivedConnection)collectedPacket.PacketContainer;
+                        hasConnection = receivedConnection.IsAccepted;
+
+                        if (hasConnection)
                         {
-                            //Pass data through to TradeManager
-                        }
-                        else if(collectedPacket.Type == IncomingPacketType.BATTLE)
-                        {
-                            //Pass data through to OnlineBattleManager
+                            Authenticate();
                         }
                     }
                 }
@@ -161,8 +177,46 @@ namespace PokemonUnity.Networking
                 formatter.Serialize(memoryStream, authPacket);
 
                 byte[] serializedData = memoryStream.ToArray();
-                client.Send(serializedData, serializedData.Length);
+                while(serializedData.Length != 0)
+                {
+                    byte[] bufferBytes;
+                    if (serializedData.Length >= 1024)
+                    {
+                        bufferBytes  = serializedData.Take(1024).ToArray();
+                        serializedData = RemoveAt(serializedData, 0, 1024);
+                    }
+                    else
+                    {
+                        bufferBytes = serializedData.Take(serializedData.Length).ToArray();
+                        serializedData = RemoveAt(serializedData, 0, serializedData.Length);
+                    }
+                    client.Send(bufferBytes, bufferBytes.Length);
+                }
             }
+        }
+
+        public static T[] RemoveAt<T>(this T[] array, int startIndex, int length)
+        {
+            if (array == null)
+                throw new ArgumentNullException("array");
+
+            if (length < 0)
+            {
+                startIndex += 1 + length;
+                length = -length;
+            }
+
+            if (startIndex < 0)
+                throw new ArgumentOutOfRangeException("startIndex");
+            if (startIndex + length > array.Length)
+                throw new ArgumentOutOfRangeException("length");
+
+            T[] newArray = new T[array.Length - length];
+
+            Array.Copy(array, 0, newArray, 0, startIndex);
+            Array.Copy(array, startIndex + length, newArray, startIndex, array.Length - startIndex - length);
+
+            return newArray;
         }
 
         /// <summary>
@@ -184,6 +238,14 @@ namespace PokemonUnity.Networking
             }
             else
             {
+                if (!IsRunning)
+                {
+                    Start();
+                }
+                else
+                {
+                    ///Wait until the authentication is complete
+                }
                 packetStack.Enqueue(outgoingPacket);
             }
         }

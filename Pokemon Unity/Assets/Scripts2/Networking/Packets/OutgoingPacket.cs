@@ -13,6 +13,14 @@ namespace PokemonUnity.Networking.Packets
 
         #region Constructors
 
+        #region NetworkProfile
+        public OutgoingPacket(string ipAdress, int port)
+        {
+            Type = OutgoingPacketType.CONNECTION;
+            PacketContainer = new ONetworkProfile(ipAdress, port);
+        }
+        #endregion
+
         #region Trading
         /// <summary>
         /// Creates a new empty Outgoing Trade Packet with the set TradeCommand
@@ -57,6 +65,7 @@ namespace PokemonUnity.Networking.Packets
     {
         TRADE,
         BATTLE,
-        AUTH
+        AUTH,
+        CONNECTION
     }
 }
