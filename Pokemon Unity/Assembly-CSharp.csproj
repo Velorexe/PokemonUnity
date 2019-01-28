@@ -62,9 +62,11 @@
     <Compile Include="Assets\Scripts2\Enums\Enums.cs" />
     <Compile Include="Assets\Scripts2\Networking\NetworkManager.cs" />
     <Compile Include="Assets\Scripts2\Networking\Packets\IncomingPacket.cs" />
+    <Compile Include="Assets\Scripts2\Networking\Packets\Incoming\IReceivedConnection.cs" />
     <Compile Include="Assets\Scripts2\Networking\Packets\OutgoingPacket.cs" />
     <Compile Include="Assets\Scripts2\Networking\Packets\Incoming\IAuthenticatePacket.cs" />
     <Compile Include="Assets\Scripts2\Networking\Packets\Outgoing\OAuthenticatePacket.cs" />
+    <Compile Include="Assets\Scripts2\Networking\Packets\Outgoing\ONetworkProfile.cs" />
     <Compile Include="Assets\Scripts2\Networking\Trading\TradeManager.cs" />
     <Compile Include="Assets\Scripts2\Networking\Packets\Outgoing\OTradePacket.cs" />
     <Compile Include="Assets\Scripts2\Pokemon\Type.cs" />

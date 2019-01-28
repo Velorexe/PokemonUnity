@@ -24,6 +24,8 @@ namespace PokemonUnity.Networking
         private const string ipAdress = "192.168.0.46";
         private const int port = 4568;
 
+        private const int maxByteBuffer = 1024;
+
         private static UdpClient client;
         private static IPEndPoint ipEndPoint;
 
@@ -61,7 +63,7 @@ namespace PokemonUnity.Networking
                 }
             }
 
-            Authenticate();
+            RequestConnection();
 
             ///Here we create a new Thread
             ///That way it can stay on the background on a new Thread
@@ -162,6 +164,35 @@ namespace PokemonUnity.Networking
                 Disconnect();
                 IsRunning = false;
                 isAuth = false;
+            }
+        }
+
+        private static void RequestConnection()
+        {
+            IPEndPoint localEndPoint = client.Client.LocalEndPoint as IPEndPoint;
+            OutgoingPacket networkProfile = new OutgoingPacket(localEndPoint.Address.ToString(), localEndPoint.Port);
+
+            using(MemoryStream memoryStream = new MemoryStream())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(memoryStream, networkProfile);
+
+                byte[] serializedData = memoryStream.ToArray();
+                while (serializedData.Length != 0)
+                {
+                    byte[] bufferBytes;
+                    if (serializedData.Length >= maxByteBuffer)
+                    {
+                        bufferBytes = serializedData.Take(maxByteBuffer).ToArray();
+                        serializedData = RemoveAt(serializedData, 0, maxByteBuffer);
+                    }
+                    else
+                    {
+                        bufferBytes = serializedData.Take(serializedData.Length).ToArray();
+                        serializedData = RemoveAt(serializedData, 0, serializedData.Length);
+                    }
+                    client.Send(bufferBytes, bufferBytes.Length);
+                }
             }
         }
 
