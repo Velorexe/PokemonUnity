@@ -3,13 +3,13 @@
     [System.Serializable]
     public class ONetworkProfile : IOutPacket
     {
-        public string IPAdress;
-        public int Port;
+        public int Username;
+        public int Password;
 
-        public ONetworkProfile(string ipAddress, int port)
+        public ONetworkProfile(int username, int password)
         {
-            IPAdress = ipAddress;
-            Port = port;
+            Username = username;
+            Password = password;
         }
     }
 }

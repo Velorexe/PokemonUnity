@@ -3,12 +3,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using System.Threading;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using PokemonUnity.Saving;
 using PokemonUnity.Networking.Packets;
 using PokemonUnity.Networking.Packets.Incoming;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace PokemonUnity.Networking
 {
@@ -97,6 +99,7 @@ namespace PokemonUnity.Networking
                         memoryStream.Write(collectedBytes, 0, collectedBytes.Length);
                         memoryStream.Position = 0;
                         BinaryFormatter formatter = new BinaryFormatter();
+                        formatter.Binder = new CustomizedBinder();
                         collectedPacket = (IncomingPacket)formatter.Deserialize(memoryStream);
                     }
 
@@ -152,9 +155,10 @@ namespace PokemonUnity.Networking
                         IReceivedConnection receivedConnection = (IReceivedConnection)collectedPacket.PacketContainer;
                         hasConnection = receivedConnection.IsAccepted;
 
+                        ///When the user has a connection they'll send their SaveData to the hub
                         if (hasConnection)
                         {
-                            Authenticate();
+                            //Authenticate();
                         }
                     }
                 }
@@ -169,8 +173,8 @@ namespace PokemonUnity.Networking
 
         private static void RequestConnection()
         {
-            IPEndPoint localEndPoint = client.Client.LocalEndPoint as IPEndPoint;
-            OutgoingPacket networkProfile = new OutgoingPacket(localEndPoint.Address.ToString(), localEndPoint.Port);
+            int playerTrainerID = 50;
+            OutgoingPacket networkProfile = new OutgoingPacket(playerTrainerID, 123);
 
             using(MemoryStream memoryStream = new MemoryStream())
             {
@@ -196,7 +200,7 @@ namespace PokemonUnity.Networking
             }
         }
 
-        private static void Authenticate()
+        private static void UploadSaveData()
         {
             //SaveData authData = SaveManager.GetActiveSave();
             SaveData authData = SaveManager.GetSave(0);
@@ -317,6 +321,31 @@ namespace PokemonUnity.Networking
         public static bool IsAuthenticated()
         {
             return isAuth;
+        }
+
+        /// <summary>
+        /// Returns a bool that indicates if the server can send the right response back.
+        /// </summary>
+        /// <returns>true if the NetworkManager is connected, false if it's still sending or isn't handled yet</returns>
+        public static bool IsConnected()
+        {
+            return hasConnection;
+        }
+    }
+
+    sealed class CustomizedBinder : SerializationBinder
+    {
+        public override Type BindToType(string assemblyName, string typeName)
+        {
+            Type returntype = null;
+            string sharedAssemblyName = "SharedAssembly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+            assemblyName = Assembly.GetExecutingAssembly().FullName;
+            typeName = typeName.Replace(sharedAssemblyName, assemblyName);
+            returntype =
+                    Type.GetType(string.Format("{0}, {1}",
+                    typeName, assemblyName));
+
+            return returntype;
         }
     }
 }

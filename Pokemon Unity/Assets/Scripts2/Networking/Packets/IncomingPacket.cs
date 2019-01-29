@@ -14,6 +14,7 @@
     {
         TRADE,
         BATTLE,
-        AUTH
+        AUTH,
+        CONNECTION
     }
 }

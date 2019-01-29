@@ -14,10 +14,10 @@ namespace PokemonUnity.Networking.Packets
         #region Constructors
 
         #region NetworkProfile
-        public OutgoingPacket(string ipAdress, int port)
+        public OutgoingPacket(int username, int password)
         {
             Type = OutgoingPacketType.CONNECTION;
-            PacketContainer = new ONetworkProfile(ipAdress, port);
+            PacketContainer = new ONetworkProfile(username, password);
         }
         #endregion
 
