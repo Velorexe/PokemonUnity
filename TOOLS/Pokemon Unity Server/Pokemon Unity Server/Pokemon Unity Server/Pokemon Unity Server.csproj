@@ -98,6 +98,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Networking\Server.cs" />
+    <Compile Include="Networking\GameServer.cs" />
+    <Compile Include="Networking\Classes\Player.cs" />
+    <Compile Include="Networking\Classes\Token.cs" />
     <Compile Include="Networking\Packets\IncomingPacket.cs" />
     <Compile Include="Networking\Packets\Incoming\IAuthenticatePacket.cs" />
     <Compile Include="Networking\Packets\Incoming\IReceivedConnection.cs" />

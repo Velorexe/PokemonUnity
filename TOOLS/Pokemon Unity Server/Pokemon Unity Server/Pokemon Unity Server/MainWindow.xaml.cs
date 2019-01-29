@@ -44,10 +44,12 @@ namespace Pokemon_Unity_Server
             if (Server.IsRunning)
             {
                 Server.Stop();
+                StartServer.Content = "Start Server";
             }
             else
             {
                 Server.Start();
+                StartServer.Content = "Stop Server";
             }
         }
     }
