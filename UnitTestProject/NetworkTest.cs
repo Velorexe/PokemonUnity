@@ -27,5 +27,15 @@ namespace Tests
             Thread.Sleep(5000);
             Assert.IsTrue(NetworkManager.IsConnected());
         }
+
+        [TestClass]
+        public class Trading
+        {
+            [TestMethod]
+            public void InitiateTrade()
+            {
+
+            }
+        }
     }
 }
