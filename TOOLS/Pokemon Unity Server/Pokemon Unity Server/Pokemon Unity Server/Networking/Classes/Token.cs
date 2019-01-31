@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Pokemon_Unity_Server.Networking.Classes
+namespace PokemonUnity.Server.Networking.Classes
 {
     class Token
     {

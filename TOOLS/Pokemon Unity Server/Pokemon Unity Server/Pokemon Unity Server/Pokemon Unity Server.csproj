@@ -108,6 +108,7 @@
     <Compile Include="Networking\Packets\OutgoingPacket.cs" />
     <Compile Include="Networking\Packets\Outgoing\ONetworkProfile.cs" />
     <Compile Include="Networking\Packets\Outgoing\OTradePacket.cs" />
+    <Compile Include="Networking\Trading\TradeRoom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

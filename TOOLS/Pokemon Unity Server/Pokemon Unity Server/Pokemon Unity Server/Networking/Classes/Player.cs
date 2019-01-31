@@ -4,13 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pokemon_Unity_Server.Networking.Classes
+namespace PokemonUnity.Server.Networking.Classes
 {
     class Player
     {
-        public Token Token;
+        public Token Token = new Token();
         public string Name;
 
         //public PlayerProfile Profile;
+        public Player(string name)
+        {
+            Name = name;
+        }
     }
 }
