@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using PokemonUnity.Networking.Server;
 
-namespace PokemonUnity.Server.Networking.Classes
+namespace PokemonUnity.Networking.Server.Classes
 {
     class Token
     {

@@ -12,9 +12,9 @@ using System.Net.Sockets;
 using PokemonUnity.Networking.Packets;
 using System.IO;
 using PokemonUnity.Networking.Packets.Incoming;
-using PokemonUnity.Server.Networking.Classes;
+using PokemonUnity.Networking.Server.Classes;
 
-namespace PokemonUnity.Server.Networking
+namespace PokemonUnity.Networking.Server
 {
     static class Server
     {
@@ -132,9 +132,9 @@ namespace PokemonUnity.Server.Networking
                 }
 
             }
-            else if (incomingPacket.Type == OutgoingPacketType.TRADE)
+            else
             {
-
+                GameServer.HandlePacket(incomingPacket, endPoint);
             }
         }
 

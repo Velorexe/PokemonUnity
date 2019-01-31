@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PokemonUnity.Server.Networking.Classes
+namespace PokemonUnity.Networking.Server.Classes
 {
     class Player
     {
