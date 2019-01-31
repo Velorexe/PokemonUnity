@@ -20,6 +20,9 @@ namespace PokemonUnity.Networking.Server.Trading
         private IPEndPoint host;
         private IPEndPoint player2;
 
+        private bool player1Confirmed;
+        private bool player2Confirmed;
+
         public TradeRoom(IPEndPoint hostEndPoint)
         {
             host = hostEndPoint;

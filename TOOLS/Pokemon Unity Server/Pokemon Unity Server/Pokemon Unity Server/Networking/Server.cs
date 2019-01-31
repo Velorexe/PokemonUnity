@@ -134,6 +134,7 @@ namespace PokemonUnity.Networking.Server
             }
             else
             {
+                ///Verify first if the Authentication is correct
                 GameServer.HandlePacket(incomingPacket, endPoint);
             }
         }
