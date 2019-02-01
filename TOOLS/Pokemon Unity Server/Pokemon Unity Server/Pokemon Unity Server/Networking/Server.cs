@@ -12,12 +12,13 @@ using System.Net.Sockets;
 using PokemonUnity.Networking.Packets;
 using System.IO;
 using PokemonUnity.Networking.Packets.Incoming;
+using PokemonUnity.Server.Networking.Classes;
 
-namespace Pokemon_Unity_Server.Networking
+namespace PokemonUnity.Server.Networking
 {
     static class Server
     {
-        private static readonly int udpPort = 4568;
+        public static readonly int udpPort = 4568;
         public static bool IsRunning = false;
 
         private static UdpClient udpSocket;
@@ -129,6 +130,7 @@ namespace Pokemon_Unity_Server.Networking
                     byte[] serializedData = memoryStream.ToArray();
                     udpSocket.Send(serializedData, serializedData.Length, endPoint);
                 }
+
             }
             else if (incomingPacket.Type == OutgoingPacketType.TRADE)
             {
