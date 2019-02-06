@@ -3,7 +3,7 @@
 namespace PokemonUnity.Networking.Packets.PacketContainers
 {
     [Serializable]
-    class TradePacket
+    public class TradePacket
     {
         public TradePacketType Type;
         //Should become SeriPokemon in the future

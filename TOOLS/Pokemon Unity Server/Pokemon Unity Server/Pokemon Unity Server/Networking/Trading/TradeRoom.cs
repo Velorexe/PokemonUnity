@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
-using System.Net.Sockets;
 using System.Net;
 using PokemonUnity.Networking.Packets;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Reflection;
-using PokemonUnity.Networking.Server.Classes;
+using PokemonUnity.Networking.Packets.PacketContainers;
 using System.Linq;
-using PokemonUnity.Networking.Packets.Outgoing;
 
 namespace PokemonUnity.Networking.Server.Trading
 {
@@ -20,8 +13,8 @@ namespace PokemonUnity.Networking.Server.Trading
         private IPEndPoint host;
         private IPEndPoint player2;
 
-        private bool player1Confirmed;
-        private bool player2Confirmed;
+        private bool player1Confirmed = false;
+        private bool player2Confirmed = false;
 
         public TradeRoom(IPEndPoint hostEndPoint)
         {
@@ -34,7 +27,7 @@ namespace PokemonUnity.Networking.Server.Trading
             player2 = player;
         }
 
-        public void HandleTradePacket(OTradePacket incomingPacket, IPEndPoint endPoint)
+        public void HandleTradePacket(TradePacket incomingPacket, IPEndPoint endPoint)
         {
 
         }
