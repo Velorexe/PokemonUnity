@@ -18,7 +18,7 @@ namespace PokemonUnity.Networking.Server
             return newPlayer;
         }
 
-        public static void HandlePacket(OutgoingPacket packet, IPEndPoint endPoint)
+        public static void HandlePacket(Packet packet, IPEndPoint endPoint)
         {
 
         }

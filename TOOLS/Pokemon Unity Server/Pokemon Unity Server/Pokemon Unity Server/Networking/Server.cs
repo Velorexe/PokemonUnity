@@ -11,7 +11,6 @@ using System.Net;
 using System.Net.Sockets;
 using PokemonUnity.Networking.Packets;
 using System.IO;
-using PokemonUnity.Networking.Packets.Incoming;
 using PokemonUnity.Networking.Server.Classes;
 
 namespace PokemonUnity.Networking.Server
@@ -56,7 +55,6 @@ namespace PokemonUnity.Networking.Server
             IPHostEntry localHostEntry;
             try
             {
-                //udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 udpSocket = new UdpClient(udpPort);
                 try
                 {
@@ -66,12 +64,12 @@ namespace PokemonUnity.Networking.Server
                         udpSocket.BeginReceive(new AsyncCallback(PacketHandler), udpSocket);
                     }
                 }
-                catch (SocketException e)
+                catch (SocketException)
                 {
 
                 }
             }
-            catch (SocketException e)
+            catch (SocketException)
             {
 
             }
@@ -97,40 +95,18 @@ namespace PokemonUnity.Networking.Server
 
         private static async void AsyncIncomingPacketHandler(byte[] message, IPEndPoint endPoint)
         {
-            OutgoingPacket incomingPacket;
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                memoryStream.Write(message, 0, message.Length);
-                memoryStream.Position = 0;
-
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Binder = new CustomizedBinder();
-
-                incomingPacket = (OutgoingPacket)formatter.Deserialize(memoryStream);
-            }
+            Packet incomingPacket = message;
             await Task.Run(() => ReadIncomingPacket(incomingPacket, endPoint));
         }
 
-        private static void ReadIncomingPacket(OutgoingPacket incomingPacket, IPEndPoint endPoint)
+        private static void ReadIncomingPacket(Packet incomingPacket, IPEndPoint endPoint)
         {
-            if (incomingPacket.Type == OutgoingPacketType.CONNECTION)
+            if (incomingPacket.PacketType == PacketTypes.LOGIN)
             {
                 ///Here we can log in the user
                 ///Then we send a confirmation back
-                IncomingPacket outgoingPacket = new IncomingPacket
-                {
-                    Type = IncomingPacketType.CONNECTION,
-                    PacketContainer = new IReceivedConnection() { IsAccepted = true }
-                };
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(memoryStream, outgoingPacket);
-
-                    byte[] serializedData = memoryStream.ToArray();
-                    udpSocket.Send(serializedData, serializedData.Length, endPoint);
-                }
-
+                byte[] serializedData = new Packet("faketoken");
+                udpSocket.Send(serializedData, serializedData.Length, endPoint);
             }
             else
             {

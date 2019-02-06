@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows;
-using Pokemon_Unity_Server.Networking;
+using PokemonUnity.Networking.Server;
 
 namespace Pokemon_Unity_Server
 {

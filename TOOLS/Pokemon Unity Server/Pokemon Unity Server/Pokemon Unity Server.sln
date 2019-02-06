@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pokemon Unity Server", "Pokemon Unity Server\Pokemon Unity Server.csproj", "{BC813C57-DEFE-4971-9E6B-AA7B9030853A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonUnity.Networking.Packets", "PokemonUnity.Networking.Packets\PokemonUnity.Networking.Packets.csproj", "{ACCE58CC-D764-45C4-A91F-67682D4095AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{BC813C57-DEFE-4971-9E6B-AA7B9030853A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC813C57-DEFE-4971-9E6B-AA7B9030853A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC813C57-DEFE-4971-9E6B-AA7B9030853A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACCE58CC-D764-45C4-A91F-67682D4095AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACCE58CC-D764-45C4-A91F-67682D4095AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACCE58CC-D764-45C4-A91F-67682D4095AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACCE58CC-D764-45C4-A91F-67682D4095AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
