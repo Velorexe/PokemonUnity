@@ -3,7 +3,7 @@
 namespace PokemonUnity.Networking.Packets.PacketContainers
 {
     [Serializable]
-    class AuthenticationPacket
+    public class AuthenticationPacket
     {
         public string Token;
 

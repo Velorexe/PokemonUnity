@@ -20,14 +20,6 @@ namespace Tests
             Assert.IsTrue(NetworkManager.IsRunning);
         }
 
-        [TestMethod]
-        public void NetworkManager_Has_Connection()
-        {
-            NetworkManager.Start();
-            Thread.Sleep(5000);
-            Assert.IsTrue(NetworkManager.IsConnected());
-        }
-
         [TestClass]
         public class Trading
         {

@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using PokemonUnity.Saving;
 using PokemonUnity.Networking.Packets;
-using PokemonUnity.Networking.Packets.Incoming;
+using PokemonUnity.Networking.Packets.PacketContainers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -23,7 +23,7 @@ namespace PokemonUnity.Networking
         private static bool isAuth;
 
         private const string encryptionKey = "pku123";
-        private const string ipAdress = "192.168.0.46";
+        private const string address = "herbertmilhomme.com";
         private const int port = 4568;
 
         private const int maxByteBuffer = 1024;
@@ -32,23 +32,22 @@ namespace PokemonUnity.Networking
         private static IPEndPoint ipEndPoint;
 
         public static bool IsRunning = false;
-        private static bool hasConnection = false;
 
-        private static Queue<OutgoingPacket> packetStack = new Queue<OutgoingPacket>();
+        private static Queue<Packet> packetStack = new Queue<Packet>();
 
         /// <summary>
         /// Starts the server and sends a ping to the server to authenticate this user.
         /// </summary>
         public static void Start()
         {
-            IPHostEntry hostEntry = Dns.GetHostEntry(ipAdress);
+            IPHostEntry hostEntry = Dns.GetHostEntry(address);
 
             /// Loop through the AddressList to obtain the supported AddressFamily. This is to avoid
             /// an exception that occurs when the host IP Address is not compatible with the address family
             /// (typical in the IPv6 case).
             foreach (IPAddress adress in hostEntry.AddressList)
             {
-                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(ipAdress), port);
+                IPEndPoint endPoint = new IPEndPoint(adress, port);
                 UdpClient tempSocket = new UdpClient(endPoint.AddressFamily);
 
                 tempSocket.Connect(endPoint);
@@ -92,78 +91,40 @@ namespace PokemonUnity.Networking
                 while (isListening)
                 {
                     byte[] collectedBytes = client.Receive(ref ipEndPoint);
-                    IncomingPacket collectedPacket;
+                    Packet receivedPacket = collectedBytes;
 
-                    using (MemoryStream memoryStream = new MemoryStream())
+                    if (!isAuth)
                     {
-                        memoryStream.Write(collectedBytes, 0, collectedBytes.Length);
-                        memoryStream.Position = 0;
-                        BinaryFormatter formatter = new BinaryFormatter();
-                        formatter.Binder = new CustomizedBinder();
-                        collectedPacket = (IncomingPacket)formatter.Deserialize(memoryStream);
-                    }
-
-                    if (hasConnection)
-                    {
-                        if (!isAuth)
+                        if (receivedPacket.PacketType == PacketTypes.AUTH)
                         {
-                            if (collectedPacket.Type == IncomingPacketType.AUTH)
+                            AuthenticationPacket authPacket = (AuthenticationPacket)receivedPacket.Message;
+                            if (string.IsNullOrEmpty(authPacket.Token))
                             {
-                                IAuthenticatePacket token = (IAuthenticatePacket)collectedPacket.PacketContainer;
-                                switch (token.Authenticated)
-                                {
-                                    case IAuthenticatePacket.AuthOptions.SUCCES:
-                                        isAuth = true;
-                                        authToken = token.AuthenticationKey;
-                                        EmptyOutgoingStack();
-                                        break;
-                                    case IAuthenticatePacket.AuthOptions.FAILED:
-                                        isAuth = false;
-                                        authToken = string.Empty;
-                                        //Failed Authentication
-                                        break;
-                                    case IAuthenticatePacket.AuthOptions.ERROR:
-                                        isAuth = false;
-                                        authToken = string.Empty;
-                                        //Error Handling
-                                        break;
-                                    default:
-                                        break;
-                                }
+                                isAuth = true;
+                                authToken = authPacket.Token;
                             }
                             else
                             {
-                                //Server is sending useless data
-                                //Should be discarded
-                                //Possible cheater or server is not doing it's job correctly
-                            }
-                        }
-                        else
-                        {
-                            if (collectedPacket.Type == IncomingPacketType.TRADE)
-                            {
-                                //Pass data through to TradeManager
-                            }
-                            else if (collectedPacket.Type == IncomingPacketType.BATTLE)
-                            {
-                                //Pass data through to OnlineBattleManager
+                                isAuth = false;
+                                authToken = string.Empty;
                             }
                         }
                     }
                     else
                     {
-                        IReceivedConnection receivedConnection = (IReceivedConnection)collectedPacket.PacketContainer;
-                        hasConnection = receivedConnection.IsAccepted;
-
-                        ///When the user has a connection they'll send their SaveData to the hub
-                        if (hasConnection)
+                        if (receivedPacket.PacketType == PacketTypes.TRADE)
                         {
-                            //Authenticate();
+                            //Pass data through to TradeManager
+                            TradeManager.ReceivePacket((TradePacket)receivedPacket.Message);
+                        }
+                        else if (receivedPacket.PacketType == PacketTypes.BATTLE)
+                        {
+                            //Pass data through to OnlineBattleManager
                         }
                     }
                 }
             }
-            catch (Exception)
+            catch (SocketException)
             {
                 Disconnect();
                 IsRunning = false;
@@ -174,12 +135,36 @@ namespace PokemonUnity.Networking
         private static void RequestConnection()
         {
             int playerTrainerID = 50;
-            OutgoingPacket networkProfile = new OutgoingPacket(playerTrainerID, 123);
+            Packet loginPacket = new Packet(playerTrainerID.ToString(), "test-password");
 
-            using(MemoryStream memoryStream = new MemoryStream())
+            byte[] serializedData = loginPacket;
+            while (serializedData.Length != 0)
+            {
+                byte[] bufferBytes;
+                if (serializedData.Length >= maxByteBuffer)
+                {
+                    bufferBytes = serializedData.Take(maxByteBuffer).ToArray();
+                    serializedData = RemoveAt(serializedData, 0, maxByteBuffer);
+                }
+                else
+                {
+                    bufferBytes = serializedData.Take(serializedData.Length).ToArray();
+                    serializedData = RemoveAt(serializedData, 0, serializedData.Length);
+                }
+                client.Send(bufferBytes, bufferBytes.Length);
+            }
+        }
+
+        private static void UploadSaveData()
+        {
+            //SaveData authData = SaveManager.GetActiveSave();
+            SaveData authData = SaveManager.GetSave(0);
+            Packet authPacket = new Packet(authData);
+
+            using (MemoryStream memoryStream = new MemoryStream())
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(memoryStream, networkProfile);
+                formatter.Serialize(memoryStream, authPacket);
 
                 byte[] serializedData = memoryStream.ToArray();
                 while (serializedData.Length != 0)
@@ -189,36 +174,6 @@ namespace PokemonUnity.Networking
                     {
                         bufferBytes = serializedData.Take(maxByteBuffer).ToArray();
                         serializedData = RemoveAt(serializedData, 0, maxByteBuffer);
-                    }
-                    else
-                    {
-                        bufferBytes = serializedData.Take(serializedData.Length).ToArray();
-                        serializedData = RemoveAt(serializedData, 0, serializedData.Length);
-                    }
-                    client.Send(bufferBytes, bufferBytes.Length);
-                }
-            }
-        }
-
-        private static void UploadSaveData()
-        {
-            //SaveData authData = SaveManager.GetActiveSave();
-            SaveData authData = SaveManager.GetSave(0);
-            OutgoingPacket authPacket = new OutgoingPacket(authData); 
-
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(memoryStream, authPacket);
-
-                byte[] serializedData = memoryStream.ToArray();
-                while(serializedData.Length != 0)
-                {
-                    byte[] bufferBytes;
-                    if (serializedData.Length >= 1024)
-                    {
-                        bufferBytes  = serializedData.Take(1024).ToArray();
-                        serializedData = RemoveAt(serializedData, 0, 1024);
                     }
                     else
                     {
@@ -255,17 +210,17 @@ namespace PokemonUnity.Networking
         }
 
         /// <summary>
-        /// Sends an OutgoingPacket to the designated Server
+        /// Sends an Packet to the designated Server
         /// </summary>
-        /// <param name="outgoingPacket">The OutgoingPacket that contains the data that needs to be send</param>
-        public static void Send(OutgoingPacket outgoingPacket)
+        /// <param name="Packet">The Packet that contains the data that needs to be send</param>
+        public static void Send(Packet Packet)
         {
             if (isAuth)
             {
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(memoryStream, outgoingPacket);
+                    formatter.Serialize(memoryStream, Packet);
 
                     byte[] serializedData = memoryStream.ToArray();
                     client.Send(serializedData, serializedData.Length);
@@ -281,19 +236,19 @@ namespace PokemonUnity.Networking
                 {
                     ///Wait until the authentication is complete
                 }
-                packetStack.Enqueue(outgoingPacket);
+                packetStack.Enqueue(Packet);
             }
         }
 
         private static void EmptyOutgoingStack()
         {
-            while(packetStack.Count != 0)
+            while (packetStack.Count != 0)
             {
-                OutgoingPacket outgoingPacket = packetStack.Dequeue();
+                Packet Packet = packetStack.Dequeue();
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(memoryStream, outgoingPacket);
+                    formatter.Serialize(memoryStream, Packet);
 
                     byte[] serializedData = memoryStream.ToArray();
                     client.Send(serializedData, serializedData.Length);
@@ -321,15 +276,6 @@ namespace PokemonUnity.Networking
         public static bool IsAuthenticated()
         {
             return isAuth;
-        }
-
-        /// <summary>
-        /// Returns a bool that indicates if the server can send the right response back.
-        /// </summary>
-        /// <returns>true if the NetworkManager is connected, false if it's still sending or isn't handled yet</returns>
-        public static bool IsConnected()
-        {
-            return hasConnection;
         }
     }
 

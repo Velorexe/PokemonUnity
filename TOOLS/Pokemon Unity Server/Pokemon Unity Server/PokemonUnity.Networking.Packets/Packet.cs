@@ -22,7 +22,7 @@ namespace PokemonUnity.Networking.Packets
         #region Trade
 
         /// <summary>
-        /// INCOMING/OUTGOING
+        /// SERVER: INCOMING/OUTGOING CLIENT: OUTGOING
         /// </summary>
         /// <param name="packetType">CONFIRM/INITIATE</param>
         public Packet(TradePacketType tradePacketType)
@@ -32,7 +32,7 @@ namespace PokemonUnity.Networking.Packets
         }
 
         /// <summary>
-        /// OUTGOING
+        /// SERVER: OUTGOING, CLIENT: INCOMING
         /// </summary>
         /// <param name="tradeRoomID">The ID of the TradeRoom</param>
         public Packet(int tradeRoomID)
@@ -42,7 +42,7 @@ namespace PokemonUnity.Networking.Packets
         }
 
         /// <summary>
-        /// INCOMING/OUTGOING
+        /// SERVER: INCOMING/OUTGOING, CLIENT: INCOMING/OUTGOING
         /// </summary>
         /// <param name="serializedPokemon">The Pokemon that needs to be send</param>
         public Packet(object serializedPokemon)
@@ -54,13 +54,24 @@ namespace PokemonUnity.Networking.Packets
 
         #region Authentication
         /// <summary>
-        /// OUTGOING
+        /// SERVER: OUTGOING
         /// </summary>
         /// <param name="token"></param>
         public Packet(string token)
         {
             PacketType = PacketTypes.AUTH;
             Message = new AuthenticationPacket(token);
+        }
+
+        /// <summary>
+        /// SERVER: INCOMING, CLIENT: OUTGOING
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        public Packet(string username, string password)
+        {
+            PacketType = PacketTypes.LOGIN;
+            Message = new LoginPacket(username, password);
         }
         #endregion
 
@@ -74,6 +85,7 @@ namespace PokemonUnity.Networking.Packets
                 memoryStream.Write(packet, 0, packet.Length);
                 memoryStream.Position = 0;
                 BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Binder = new CustomizedBinder();
                 newPacket = (Packet)formatter.Deserialize(memoryStream);
             }
             return newPacket;
@@ -84,6 +96,7 @@ namespace PokemonUnity.Networking.Packets
             using(MemoryStream memoryStream = new MemoryStream())
             {
                 BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Binder = new CustomizedBinder();
                 formatter.Serialize(memoryStream, packet);
                 return memoryStream.GetBuffer();
             }
@@ -103,12 +116,6 @@ namespace PokemonUnity.Networking.Packets
                     typeName, assemblyName));
 
             return returntype;
-        }
-
-        public override void BindToName(Type serializedType, out string assemblyName, out string typeName)
-        {
-            base.BindToName(serializedType, out assemblyName, out typeName);
-            assemblyName = "SharedAssembly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
         }
     }
 }
