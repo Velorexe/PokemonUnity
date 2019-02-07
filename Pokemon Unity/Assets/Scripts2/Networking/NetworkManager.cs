@@ -66,13 +66,16 @@ namespace PokemonUnity.Networking
                 }
             }
 
-            ///Here we create a new Thread
-            ///That way it can stay on the background on a new Thread
-            Thread listeningThread = new Thread(BackgroundListener)
+            if (IsRunning)
             {
-                IsBackground = true
-            };
-            listeningThread.Start();
+                ///Here we create a new Thread
+                ///That way it can stay on the background on a new Thread
+                Thread listeningThread = new Thread(BackgroundListener)
+                {
+                    IsBackground = true
+                };
+                listeningThread.Start();
+            }
         }
 
         /// <summary>
