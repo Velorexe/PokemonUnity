@@ -102,6 +102,7 @@ namespace PokemonUnity.Networking
                             {
                                 isAuth = true;
                                 authToken = authPacket.Token;
+                                EmptyPacketStack();
                             }
                             else
                             {
@@ -163,16 +164,12 @@ namespace PokemonUnity.Networking
             byte[] IV = rfc.GetBytes(16);
 
             byte[] encrypted;
-            using (MemoryStream mstream = new MemoryStream())
+            using (MemoryStream memoryStream = new MemoryStream())
+            using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
+            using (CryptoStream cryptoStream = new CryptoStream(memoryStream, aesProvider.CreateEncryptor(Key, IV), CryptoStreamMode.Write))
             {
-                using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
-                {
-                    using (CryptoStream cryptoStream = new CryptoStream(mstream, aesProvider.CreateEncryptor(Key, IV), CryptoStreamMode.Write))
-                    {
-                        cryptoStream.Write(bytesToEncrypt, 0, bytesToEncrypt.Length);
-                    }
-                }
-                encrypted = mstream.ToArray();
+                cryptoStream.Write(bytesToEncrypt, 0, bytesToEncrypt.Length);
+                encrypted = memoryStream.ToArray();
             }
 
             var messageLengthAs32Bits = Convert.ToInt32(bytesToEncrypt.Length);
@@ -254,14 +251,8 @@ namespace PokemonUnity.Networking
         {
             if (isAuth)
             {
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(memoryStream, Packet);
-
-                    byte[] serializedData = memoryStream.ToArray();
-                    client.Send(serializedData, serializedData.Length);
-                }
+                byte[] serializedData = Packet;
+                client.Send(serializedData, serializedData.Length);
             }
             else
             {
@@ -269,15 +260,11 @@ namespace PokemonUnity.Networking
                 {
                     Start();
                 }
-                else
-                {
-                    ///Wait until the authentication is complete
-                }
                 packetStack.Enqueue(Packet);
             }
         }
 
-        private static void EmptyOutgoingStack()
+        private static void EmptyPacketStack()
         {
             while (packetStack.Count != 0)
             {
@@ -318,6 +305,11 @@ namespace PokemonUnity.Networking
         public static void SetMode(NetworkMode mode)
         {
             Mode = mode;
+        }
+
+        public static string RequestToken()
+        {
+            return authToken;
         }
     }
 

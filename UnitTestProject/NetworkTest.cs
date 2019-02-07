@@ -26,7 +26,7 @@ namespace Tests
             [TestMethod]
             public void InitiateTrade()
             {
-
+                TradeManager.InitiateTrade();
             }
         }
     }

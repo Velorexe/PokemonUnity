@@ -13,13 +13,13 @@ namespace PokemonUnity.Networking
 
         public static void InitiateTrade()
         {
-            Packet iniateTrade = new Packet(TradePacketType.INITIATE);
+            Packet iniateTrade = new Packet(NetworkManager.RequestToken(), TradePacketType.INITIATE);
             NetworkManager.Send(iniateTrade);
         }
 
         public static void SetPokemon(SeriPokemon pokemonToSet)
         {
-            Packet setPokemon = new Packet(pokemonToSet);
+            Packet setPokemon = new Packet(NetworkManager.RequestToken(), pokemonToSet);
             NetworkManager.Send(setPokemon);
         }
     }
