@@ -63,6 +63,7 @@
     <Compile Include="Assets\Scripts2\Enums\SaveEvent.cs" />
     <Compile Include="Assets\Scripts2\EventHandlers\BattlePokemonHandler.cs" />
     <Compile Include="Assets\Scripts2\Enums\Enums.cs" />
+    <Compile Include="Assets\Scripts2\Networking\Battling\BattleManager.cs" />
     <Compile Include="Assets\Scripts2\Networking\NetworkManager.cs" />
     <Compile Include="Assets\Scripts2\Networking\NetworkMode.cs" />
     <Compile Include="Assets\Scripts2\Networking\Trading\TradeManager.cs" />
