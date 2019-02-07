@@ -23,13 +23,23 @@ namespace PokemonUnity.Networking.Packets
         #region Trade
 
         /// <summary>
+        /// SERVER: INCOMING, CLIENT: OUTGOING
+        /// </summary>
+        /// <param name="token"></param>
+        public Packet(string token)
+        {
+            Token = token;
+            PacketType = PacketTypes.TRADE;
+            Message = new TradePacket();
+        }
+        /// <summary>
         /// SERVER: INCOMING/OUTGOING CLIENT: OUTGOING
         /// </summary>
         /// <param name="packetType">CONFIRM/INITIATE</param>
-        public Packet(string token, TradePacketType tradePacketType)
+        public Packet(string token, TradePacketType tradePacketType, int tradeRoomID)
         {
             PacketType = PacketTypes.TRADE;
-            Message = new TradePacket(tradePacketType);
+            Message = new TradePacket(tradePacketType, tradeRoomID);
         }
 
         /// <summary>
@@ -46,10 +56,10 @@ namespace PokemonUnity.Networking.Packets
         /// SERVER: INCOMING/OUTGOING, CLIENT: INCOMING/OUTGOING
         /// </summary>
         /// <param name="serializedPokemon">The Pokemon that needs to be send</param>
-        public Packet(string token, object serializedPokemon)
+        public Packet(string token, object serializedPokemon, int tradeRoomID)
         {
             PacketType = PacketTypes.TRADE;
-            Message = new TradePacket(serializedPokemon);
+            Message = new TradePacket(serializedPokemon, tradeRoomID);
         }
         #endregion
 
