@@ -16,6 +16,11 @@ namespace PokemonUnity.Networking.Packets
 
         public object Message;
 
+        public void SetToken(string token)
+        {
+            Token = token;
+        }
+
         #region Constructors
 
         private Packet() { }
@@ -26,17 +31,17 @@ namespace PokemonUnity.Networking.Packets
         /// SERVER: INCOMING, CLIENT: OUTGOING
         /// </summary>
         /// <param name="token"></param>
-        public Packet(string token)
+        public Packet(TradePacketType tradePacketType)
         {
-            Token = token;
             PacketType = PacketTypes.TRADE;
             Message = new TradePacket();
         }
+
         /// <summary>
         /// SERVER: INCOMING/OUTGOING CLIENT: OUTGOING
         /// </summary>
         /// <param name="packetType">CONFIRM/INITIATE</param>
-        public Packet(string token, TradePacketType tradePacketType, int tradeRoomID)
+        public Packet(TradePacketType tradePacketType, int tradeRoomID)
         {
             PacketType = PacketTypes.TRADE;
             Message = new TradePacket(tradePacketType, tradeRoomID);
@@ -46,7 +51,7 @@ namespace PokemonUnity.Networking.Packets
         /// SERVER: OUTGOING, CLIENT: INCOMING
         /// </summary>
         /// <param name="tradeRoomID">The ID of the TradeRoom</param>
-        public Packet(string token, int tradeRoomID)
+        public Packet(int tradeRoomID)
         {
             PacketType = PacketTypes.TRADE;
             Message = new TradePacket(tradeRoomID);
@@ -56,7 +61,7 @@ namespace PokemonUnity.Networking.Packets
         /// SERVER: INCOMING/OUTGOING, CLIENT: INCOMING/OUTGOING
         /// </summary>
         /// <param name="serializedPokemon">The Pokemon that needs to be send</param>
-        public Packet(string token, object serializedPokemon, int tradeRoomID)
+        public Packet(object serializedPokemon, int tradeRoomID)
         {
             PacketType = PacketTypes.TRADE;
             Message = new TradePacket(serializedPokemon, tradeRoomID);

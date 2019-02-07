@@ -191,32 +191,7 @@ namespace PokemonUnity.Networking
 
         private static void UploadSaveData()
         {
-            //SaveData authData = SaveManager.GetActiveSave();
-            SaveData authData = SaveManager.GetSave(0);
-            Packet authPacket = new Packet(authToken, authData);
-
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(memoryStream, authPacket);
-
-                byte[] serializedData = memoryStream.ToArray();
-                while (serializedData.Length != 0)
-                {
-                    byte[] bufferBytes;
-                    if (serializedData.Length >= maxByteBuffer)
-                    {
-                        bufferBytes = serializedData.Take(maxByteBuffer).ToArray();
-                        serializedData = RemoveAt(serializedData, 0, maxByteBuffer);
-                    }
-                    else
-                    {
-                        bufferBytes = serializedData.Take(serializedData.Length).ToArray();
-                        serializedData = RemoveAt(serializedData, 0, serializedData.Length);
-                    }
-                    client.Send(bufferBytes, bufferBytes.Length);
-                }
-            }
+            
         }
 
         public static T[] RemoveAt<T>(this T[] array, int startIndex, int length)
@@ -251,6 +226,7 @@ namespace PokemonUnity.Networking
         {
             if (isAuth)
             {
+                Packet.SetToken(authToken);
                 byte[] serializedData = Packet;
                 client.Send(serializedData, serializedData.Length);
             }
