@@ -11,6 +11,7 @@ using PokemonUnity.Networking.Packets.PacketContainers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 
 namespace PokemonUnity.Networking
 {
@@ -32,6 +33,7 @@ namespace PokemonUnity.Networking
         private static IPEndPoint ipEndPoint;
 
         public static bool IsRunning = false;
+        private static NetworkMode Mode = NetworkMode.NETWORK;
 
         private static Queue<Packet> packetStack = new Queue<Packet>();
 
@@ -63,8 +65,6 @@ namespace PokemonUnity.Networking
                     continue;
                 }
             }
-
-            RequestConnection();
 
             ///Here we create a new Thread
             ///That way it can stay on the background on a new Thread
@@ -132,12 +132,11 @@ namespace PokemonUnity.Networking
             }
         }
 
-        private static void RequestConnection()
+        private static void Login(string username, string password)
         {
             int playerTrainerID = 50;
-            Packet loginPacket = new Packet(playerTrainerID.ToString(), "test-password");
+            byte[] serializedData = Encrypt(new Packet(playerTrainerID.ToString(), "test-password"), encryptionKey);
 
-            byte[] serializedData = loginPacket;
             while (serializedData.Length != 0)
             {
                 byte[] bufferBytes;
@@ -155,11 +154,49 @@ namespace PokemonUnity.Networking
             }
         }
 
+        private static byte[] Encrypt(byte[] bytesToEncrypt, string password)
+        {
+            byte[] ivSeed = Guid.NewGuid().ToByteArray();
+
+            var rfc = new Rfc2898DeriveBytes(password, ivSeed);
+            byte[] Key = rfc.GetBytes(16);
+            byte[] IV = rfc.GetBytes(16);
+
+            byte[] encrypted;
+            using (MemoryStream mstream = new MemoryStream())
+            {
+                using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
+                {
+                    using (CryptoStream cryptoStream = new CryptoStream(mstream, aesProvider.CreateEncryptor(Key, IV), CryptoStreamMode.Write))
+                    {
+                        cryptoStream.Write(bytesToEncrypt, 0, bytesToEncrypt.Length);
+                    }
+                }
+                encrypted = mstream.ToArray();
+            }
+
+            var messageLengthAs32Bits = Convert.ToInt32(bytesToEncrypt.Length);
+            var messageLength = BitConverter.GetBytes(messageLengthAs32Bits);
+
+            encrypted = encrypted.Prepend(ivSeed);
+            encrypted = encrypted.Prepend(messageLength);
+
+            return encrypted;
+        }
+
+        public static byte[] Prepend(this byte[] bytes, byte[] bytesToPrepend)
+        {
+            var tmp = new byte[bytes.Length + bytesToPrepend.Length];
+            bytesToPrepend.CopyTo(tmp, 0);
+            bytes.CopyTo(tmp, bytesToPrepend.Length);
+            return tmp;
+        }
+
         private static void UploadSaveData()
         {
             //SaveData authData = SaveManager.GetActiveSave();
             SaveData authData = SaveManager.GetSave(0);
-            Packet authPacket = new Packet(authData);
+            Packet authPacket = new Packet(authToken, authData);
 
             using (MemoryStream memoryStream = new MemoryStream())
             {
@@ -276,6 +313,11 @@ namespace PokemonUnity.Networking
         public static bool IsAuthenticated()
         {
             return isAuth;
+        }
+
+        public static void SetMode(NetworkMode mode)
+        {
+            Mode = mode;
         }
     }
 

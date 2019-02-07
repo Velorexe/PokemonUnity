@@ -11,6 +11,7 @@ namespace PokemonUnity.Networking.Packets
     public class Packet
     {
         public PacketTypes PacketType;
+        public string Token;
         public DateTime TimeCreated = DateTime.Now;
 
         public object Message;
@@ -25,7 +26,7 @@ namespace PokemonUnity.Networking.Packets
         /// SERVER: INCOMING/OUTGOING CLIENT: OUTGOING
         /// </summary>
         /// <param name="packetType">CONFIRM/INITIATE</param>
-        public Packet(TradePacketType tradePacketType)
+        public Packet(string token, TradePacketType tradePacketType)
         {
             PacketType = PacketTypes.TRADE;
             Message = new TradePacket(tradePacketType);
@@ -35,7 +36,7 @@ namespace PokemonUnity.Networking.Packets
         /// SERVER: OUTGOING, CLIENT: INCOMING
         /// </summary>
         /// <param name="tradeRoomID">The ID of the TradeRoom</param>
-        public Packet(int tradeRoomID)
+        public Packet(string token, int tradeRoomID)
         {
             PacketType = PacketTypes.TRADE;
             Message = new TradePacket(tradeRoomID);
@@ -45,7 +46,7 @@ namespace PokemonUnity.Networking.Packets
         /// SERVER: INCOMING/OUTGOING, CLIENT: INCOMING/OUTGOING
         /// </summary>
         /// <param name="serializedPokemon">The Pokemon that needs to be send</param>
-        public Packet(object serializedPokemon)
+        public Packet(string token, object serializedPokemon)
         {
             PacketType = PacketTypes.TRADE;
             Message = new TradePacket(serializedPokemon);
