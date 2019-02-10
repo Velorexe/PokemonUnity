@@ -221,7 +221,7 @@ namespace PokemonUnity.Networking
         }
 
         /// <summary>
-        /// Sends an Packet to the designated Server
+        /// Sends a Packet to the designated Server
         /// </summary>
         /// <param name="Packet">The Packet that contains the data that needs to be send</param>
         public static void Send(Packet Packet)
