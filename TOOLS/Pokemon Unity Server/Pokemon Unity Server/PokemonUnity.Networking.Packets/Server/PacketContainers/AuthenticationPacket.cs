@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PokemonUnity.Networking.Packets.PacketContainers
+namespace PokemonUnity.Networking.Server.Packets.PacketContainers
 {
     [Serializable]
     public class AuthenticationPacket

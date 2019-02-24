@@ -42,11 +42,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packet.cs" />
-    <Compile Include="PacketContainers\AuthenticationPacket.cs" />
-    <Compile Include="PacketContainers\LoginPacket.cs" />
-    <Compile Include="PacketContainers\TradePacket.cs" />
-    <Compile Include="PacketTypes.cs" />
+    <Compile Include="Client\Packet.cs" />
+    <Compile Include="Client\PacketContainers\AuthenticationPacket.cs" />
+    <Compile Include="Client\PacketContainers\BattlePacket.cs" />
+    <Compile Include="Client\PacketContainers\LoginPacket.cs" />
+    <Compile Include="Client\PacketContainers\TradePacket.cs" />
+    <Compile Include="Client\PacketTypes.cs" />
+    <Compile Include="Server\Packet.cs" />
+    <Compile Include="Server\PacketContainers\AuthenticationPacket.cs" />
+    <Compile Include="Server\PacketContainers\BattlePacket.cs" />
+    <Compile Include="Server\PacketContainers\LoginPacket.cs" />
+    <Compile Include="Server\PacketContainers\TradePacket.cs" />
+    <Compile Include="Server\PacketTypes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

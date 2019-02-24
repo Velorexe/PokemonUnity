@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using PokemonUnity.Networking.Packets.PacketContainers;
 
-namespace PokemonUnity.Networking.Packets
+namespace PokemonUnity.Networking.Server.Packets
 {
     [Serializable]
     public class Packet
@@ -88,6 +88,38 @@ namespace PokemonUnity.Networking.Packets
         {
             PacketType = PacketTypes.LOGIN;
             Message = new LoginPacket(username, password);
+        }
+        #endregion
+
+        #region Battle
+        /// <summary>
+        /// SERVER: INCOMING, CLIENT: OUTGOING
+        /// </summary>
+        /// <param name="token"></param>
+        public Packet(BattlePacketType battlePacketType)
+        {
+            PacketType = PacketTypes.BATTLE;
+            Message = new TradePacket();
+        }
+
+        /// <summary>
+        /// SERVER: INCOMING/OUTGOING CLIENT: OUTGOING
+        /// </summary>
+        /// <param name="packetType">CONFIRM/INITIATE</param>
+        public Packet(BattlePacketType tradePacketType, int tradeRoomID)
+        {
+            PacketType = PacketTypes.BATTLE;
+            Message = new TradePacket(tradePacketType, tradeRoomID);
+        }
+
+        /// <summary>
+        /// SERVER: INCOMING/OUTGOING, CLIENT: INCOMING/OUTGOING
+        /// </summary>
+        /// <param name="serializedPokemon">The Pokemon that needs to be send</param>
+        public Packet(object serializedPokemon, int tradeRoomID)
+        {
+            PacketType = PacketTypes.TRADE;
+            Message = new TradePacket(serializedPokemon, tradeRoomID);
         }
         #endregion
 

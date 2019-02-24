@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using PokemonUnity.Saving;
 using PokemonUnity.Networking.Packets;
 using PokemonUnity.Networking.Packets.PacketContainers;
 using System.Collections.Generic;

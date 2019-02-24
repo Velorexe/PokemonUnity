@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PokemonUnity.Networking.Packets.PacketContainers
+namespace PokemonUnity.Networking.Client.Packets.PacketContainers
 {
     [Serializable]
     public class TradePacket
@@ -26,12 +26,6 @@ namespace PokemonUnity.Networking.Packets.PacketContainers
             Type = TradePacketType.SETPOKEMON;
             Object = serializedPokemon;
             TradeRoomID = tradeRoomID;
-        }
-
-        public TradePacket(int tradeRoomID)
-        {
-            Type = TradePacketType.INITIATE;
-            Object = tradeRoomID;
         }
     }
 

@@ -1,4 +1,4 @@
-﻿namespace PokemonUnity.Networking.Packets.PacketContainers
+﻿namespace PokemonUnity.Networking.Client.Packets.PacketContainers
 {
     [System.Serializable]
     public class LoginPacket

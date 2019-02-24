@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using PokemonUnity.Networking.Packets;
 
 namespace PokemonUnity.Networking.Battling
 {
@@ -11,7 +8,7 @@ namespace PokemonUnity.Networking.Battling
 
         public static void InitiateBattle()
         {
-
+            Packet initiatePacket = new Packet()
         }
     }
 }
