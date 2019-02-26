@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using PokemonUnity.Networking.Packets.PacketContainers;
+using PokemonUnity.Networking.Client.Packets.PacketContainers;
 
 namespace PokemonUnity.Networking.Server.Packets
 {
